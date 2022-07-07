@@ -49,7 +49,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.data.id").value(ID))
                 .andExpect(jsonPath("$.data.name").value(NAME))
                 .andExpect(jsonPath("$.data.email").value(EMAIL))
-                .andExpect(jsonPath("$.data.password").value(PASSWORD));
+                .andExpect(jsonPath("$.data.password").doesNotExist());
     }
 
     @Test
@@ -58,7 +58,7 @@ public class UserControllerTest {
                         .content(getJsonPayLoad(ID, NAME, "email", PASSWORD)) //body da request
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest()) //esperamos um erro
+                .andExpect(status().isBadRequest()) //encontrar erro
                 .andExpect(jsonPath("$.errors[0]").value("Email está inválido, por favor, verifique-o"));
     }
 

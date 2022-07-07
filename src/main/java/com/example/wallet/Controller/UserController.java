@@ -3,6 +3,7 @@ package com.example.wallet.Controller;
 import com.example.wallet.Model.Dto.UserDTO;
 import com.example.wallet.Model.User;
 import com.example.wallet.Service.UserService;
+import com.example.wallet.Utils.Bcrypt;
 import com.example.wallet.Utils.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,7 +42,7 @@ public class UserController {
         user.setId(dto.getId());
         user.setEmail(dto.getEmail());
         user.setName(dto.getName());
-        user.setPassword(dto.getPassword());
+        user.setPassword(Bcrypt.getHash(dto.getPassword()));
 
         return user;
     }
@@ -51,7 +52,6 @@ public class UserController {
         dto.setId(u.getId());
         dto.setEmail(u.getEmail());
         dto.setName(u.getName());
-        dto.setPassword(u.getPassword());
 
         return dto;
     }
