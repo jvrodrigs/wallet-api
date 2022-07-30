@@ -12,6 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("wallet-item")
@@ -73,6 +75,48 @@ public class WalletItemController {
         BigDecimal value = service.sumByWalletId(w);
         response.setData(value == null ? BigDecimal.ZERO : value);
 
+        return ResponseEntity.ok().body(response);
+    }
+
+
+    @PutMapping
+    public ResponseEntity<Response<WalletItemDTO>> update(@Valid @RequestBody WalletItemDTO dto, BindingResult result) {
+
+        Response<WalletItemDTO> response = new Response<WalletItemDTO>();
+
+        Optional<WalletItem> wi = service.findById(dto.getId());
+
+        if (!wi.isPresent()) {
+            result.addError(new ObjectError("WalletItem", "WalletItem não encontrado"));
+        } else if (wi.get().getWallet().getId().compareTo(dto.getWallet()) != 0) {
+            result.addError(new ObjectError("WalletItemChanged", "Você não pode alterar a carteira"));
+        }
+
+        if (result.hasErrors()) {
+            result.getAllErrors().forEach(r -> response.getErrors().add(r.getDefaultMessage()));
+
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        WalletItem saved = service.save(convertDtoToWalletItem(dto));
+
+        response.setData(convertWalletItemToDto(saved));
+        return ResponseEntity.ok().body(response);
+    }
+
+    @DeleteMapping(value = "/{walletItemId}")
+    public ResponseEntity<Response<String>> delete(@PathVariable("walletItemId") Long walletItemId) {
+        Response<String> response = new Response<String>();
+
+        Optional<WalletItem> wi = service.findById(walletItemId);
+
+        if (!wi.isPresent()) {
+            response.getErrors().add("Carteira de id " + walletItemId + " não encontrada");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
+        service.deleteById(walletItemId);
+        response.setData("Carteira de id "+ walletItemId + " apagada com sucesso");
         return ResponseEntity.ok().body(response);
     }
 

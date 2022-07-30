@@ -1,5 +1,6 @@
 package com.example.wallet.Model.Dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotNull;
@@ -13,6 +14,7 @@ public class WalletItemDTO {
     @NotNull(message = "Informe qual carteira pertence este item")
     private Long wallet;
     @NotNull(message = "Informe uma data")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", locale = "pt-BR", timezone = "Brazil/East")
     private Date date;
     @NotNull(message = "Informe o tipo deste item")
     @Pattern(regexp = "^(ENTRADA|SAÍDA)$", message = "Para informar o tipo, somente são aceitos os valores: ENTRADA ou SAÍDA")
