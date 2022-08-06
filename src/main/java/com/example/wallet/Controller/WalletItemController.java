@@ -1,11 +1,14 @@
 package com.example.wallet.Controller;
 
 import com.example.wallet.Model.Dto.WalletItemDTO;
+import com.example.wallet.Model.UserWallet;
 import com.example.wallet.Model.Wallet;
 import com.example.wallet.Model.WalletItem;
+import com.example.wallet.Service.UserWalletService;
 import com.example.wallet.Service.WalletItemService;
 import com.example.wallet.Utils.Enums.TypeEnumWalletItem;
 import com.example.wallet.Utils.Response;
+import com.example.wallet.Utils.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -29,6 +32,9 @@ public class WalletItemController {
     @Autowired
     private WalletItemService service;
 
+    @Autowired
+    private UserWalletService userWalletService;
+
     private static final String FORMAT_DATE = "dd-MM-yyyy";
 
     @PostMapping("create")
@@ -51,6 +57,14 @@ public class WalletItemController {
                                                                           @RequestParam("endDate") @DateTimeFormat(pattern = FORMAT_DATE) Date endDate,
                                                                           @RequestParam(name = "page",defaultValue = "0") int pg){
         Response<Page<WalletItemDTO>> response = new Response<Page<WalletItemDTO>>();
+
+        Optional<UserWallet> uw = userWalletService.findByUsersIdAndWalletId(Util.getAuthenticatedUserId(), id);
+
+        if (!uw.isPresent()){
+            response.getErrors().add("Você não tem acesso a está carteira.");
+            return ResponseEntity.badRequest().body(response);
+        }
+
         Page<WalletItem> items = service.findBetweenDates(id, startDate, endDate, pg);
         Page<WalletItemDTO> dto = items.map(this::convertWalletItemToDto);
         response.setData(dto);
